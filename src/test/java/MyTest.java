@@ -1,8 +1,11 @@
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -12,107 +15,102 @@ import org.testng.annotations.BeforeTest;
 import org.openqa.selenium.WebElement;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class MyTest {
 
-    @Test
-    public void FirstTest()
+    private ChromeDriver driver;
+    private WebDriverWait wait;
+
+    @Before
+    public void startTest()
     {
         System.setProperty("webdriver.chrome.driver", "C:/Users/denzi/OneDrive/Рабочий стол/chromedriver.exe/");
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--start-maximized");
-        ChromeDriver driver = new ChromeDriver(options);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-        driver.get("https://www.dns-shop.ru/");
+        driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        driver.get("https://www2.hm.com/ru_ru/index.html");
 
-        WebElement element = driver.findElement(By.xpath("//*[@id=\"homepage-desktop-menu-wrap\"]/div/div[1]/div[1]"));
+    }
+
+    @Test
+    public void FirstTest() throws InterruptedException {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/header/nav/ul[2]/li[4]/a")));
+        WebElement element = driver.findElement(By.xpath("/html/body/header/nav/ul[2]/li[4]/a"));
         element.click();
 
-        WebElement catalog = driver.findElement(By.xpath("/html/body/div[1]/div[1]/a[3]"));
-        driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='menu-links']/li[4]/ul/li[3]/a")));
+        WebElement catalog = driver.findElement(By.xpath("//*[@id='menu-links']/li[4]/ul/li[3]/a"));
         catalog.click();
 
-        WebElement product = driver.findElement(By.xpath("/html/body/div[1]/div[1]/a[1]"));
-        driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='page-content']/div/div[3]/div[1]/div[1]/form/fieldset[6]/button")));
+        WebElement product = driver.findElement(By.xpath("//*[@id='page-content']/div/div[3]/div[1]/div[1]/form/fieldset[6]/button"));
         product.click();
 
-        driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='side-drawer-1']/div/div/div[1]/div/ul/li[1]")));
+        WebElement sort = driver.findElement(By.xpath("//*[@id='side-drawer-1']/div/div/div[1]/div/ul/li[1]"));
+        sort.click();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='drawer-sort']/ul/li[3]")));
+        WebElement sort1 = driver.findElement(By.xpath("//*[@id='drawer-sort']/ul/li[3]"));
+        sort1.click();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='side-drawer-1']/div/div/div[2]/button[2]")));
+        WebElement sort2 = driver.findElement(By.xpath("//*[@id='side-drawer-1']/div/div/div[2]/button[2]"));
+        sort2.click();
+
+        Thread.sleep(5000);
+        List<WebElement> lstElement = driver.findElements(By.xpath("//*[@id='page-content']/div/div[3]/ul/li/article/div[2]/strong/span"));
         ArrayList<Double> lstPrice = new ArrayList<Double>();
         boolean flag = true;
-        int j = 2;
-        for (int i = 0; i < 10; i++) {
-            try {
-                String xPath = "/html/body/div[1]/div/div[2]/div[2]/div[2]/div/div[" + j + "]/div[" + (i + 1) + "]/div[4]/div/div[1]";
-                if (xPath.isEmpty()) {
-                    j *= 2;
-                    i = 0;
-                }
-                xPath = "/html/body/div[1]/div/div[2]/div[2]/div[2]/div/div[" + j + "]/div[" + (i + 1) + "]/div[4]/div/div[1]";
-                String str = driver.findElement(By.xpath(xPath)).getText();
-                lstPrice.add(Double.parseDouble(str.split(" ")[0]));
-            }
-            catch (Exception e)
+        for (var item : lstElement) {
+            String temp = item.getText();
+            temp = temp.replace("&nbsp;", " ");
+            String[] vs = temp.split(" ");
+            lstPrice.add(Double.parseDouble(vs[0] + vs[1]));
+        }
+        for (int i = 1; i < lstPrice.size(); i++) {
+            if (lstPrice.get(i) < lstPrice.get(i - 1))
             {
-                break;
+                flag = false;
             }
-
-            if (i > 1) {
-                if (lstPrice.get(i) < lstPrice.get(i - 1))
-                {
-                    flag = false;
-                    break;
-                }
-            }
-            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         }
         Assert.assertTrue(flag);
-        driver.quit();
+
     }
 
     @Test
     public void SecondTest()
     {
-        System.setProperty("webdriver.chrome.driver", "C:/Users/denzi/OneDrive/Рабочий стол/chromedriver.exe/");
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--start-maximized");
-        ChromeDriver driver = new ChromeDriver(options);
-        driver.get("https://www.intel.ru/content/www/ru/ru/homepage.html");
-        WebElement element = driver.findElement(By.xpath("//*[@id=\"language-toggle-button\"]"));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='main-content']/div/div[3]/section[5]/ul/li/a")));
+        WebElement element = driver.findElement(By.xpath("//*[@id='main-content']/div/div[3]/section[5]/ul/li/a"));
         String actualTooltip = element.getAttribute("title");
         System.out.println(actualTooltip);
         driver.quit();
     }
 
     @Test
-    public void ThirdTest()
+    public void ThirdTest() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/header/nav/ul[1]/li[1]/div/a[1]")));
+        WebElement element = driver.findElement(By.xpath("/html/body/header/nav/ul[1]/li[1]/div/a[1]"));
+        element.click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div[11]/div/div/button")));
+        WebElement element1 = driver.findElement(By.xpath("/html/body/div[11]/div/div/button"));
+        element1.click();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div[12]/div/div/div/form/button")));
+        driver.findElement(By.xpath("//*[@id=\"modal-signin-email\"]")).sendKeys("Ploho@hm.ru");
+        driver.findElement(By.xpath("//*[@id=\"modal-signin-password\"]")).sendKeys("Privet123");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div[12]/div/div/div/form/button")));
+        WebElement element2 = driver.findElement(By.xpath("/html/body/div[12]/div/div/div/form/button"));
+        element2.click();
+        System.out.println(driver.findElement(By.xpath("//*[@id='modal-signin-dob-required-error']")).getText());
+    }
+    @After
+    public void endTest()
     {
-        System.setProperty("webdriver.chrome.driver", "C:/Users/denzi/OneDrive/Рабочий стол/chromedriver.exe/");
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--start-maximized");
-        ChromeDriver driver = new ChromeDriver(options);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-        driver.get("https://www.intel.ru/content/www/ru/ru/forms/basic-intel-registration.html");
-        wait.until(ExpectedConditions.urlContains("https://www.intel.ru/content/www/ru/ru/forms/basic-intel-registration.html"));
-        driver.findElement(By.xpath("//*[@id='FirstName']")).sendKeys("Citilink");
-        driver.findElement(By.xpath("//*[@id='LastName']")).sendKeys("Rabotaet");
-        driver.findElement(By.xpath("//*[@id='EmailID']")).sendKeys("Ploho@citilink.ru");
-        driver.findElement(By.xpath("//*[@id='LoginID']")).sendKeys("DnsKruto");
-        driver.findElement(By.xpath("//*[@id='Password']")).sendKeys("NeLuche2$");
-        driver.findElement(By.xpath("//*[@id='PasswordConfirmation']")).sendKeys("NeLuche2$");
-        driver.findElement(By.xpath("//*[@id='sectionTitle0']/div/div/div/div[5]/div/label/span[2]/select/option[@value='AF']")).click();
-        driver.findElement(By.xpath("//*[@id='sectionTitle0']/div/div/div/div[6]/div/label/span[2]/select/option[@value='FIN-ACCT']")).click();
-        driver.findElement(By.xpath("//*[@id='sectionTitle0']/div/div/div/div[7]/div[1]/label/span[2]/select/option[5]")).click();
-        //можно убирать, для проверки того, что он не пустит тебя дальше без ввода какого-то поля
-        driver.findElement(By.xpath("//*[@id='sectionTitle0']/div/div/div/div[7]/div[2]/label")).sendKeys("12345");
-        WebElement element = driver.findElement(By.xpath("//*[@id='sectionTitle0']/div/div/div/div[8]/div/div/button"));
-        if (element.getAttribute("disabled") != null)
-        {
-            Assert.assertTrue(true);
-        }
-        else
-        {
-            Assert.assertFalse(false);
-        }
+        driver.quit();
     }
 }
